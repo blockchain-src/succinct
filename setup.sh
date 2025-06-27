@@ -191,9 +191,7 @@ if ! check_cuda_version; then
     check_status "NVIDIA driver and CUDA installation"
 
     print_message "NVIDIA drivers installed. System needs to reboot."
-    print_message "Please run this script again after reboot to complete the setup."
-    sleep 10
-    reboot
+    sleep 5
 fi
 
 # Pull Succinct Prover Docker image
