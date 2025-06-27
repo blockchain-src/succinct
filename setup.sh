@@ -25,36 +25,21 @@ check_cuda_version() {
         return 1
     fi
     
-    # Get driver version from nvidia-smi
-    driver_version=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | cut -d. -f1)
+    # Get driver version from nvidia-smi, take only the first line
+    driver_version=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -n1 | cut -d. -f1)
     print_message "Current NVIDIA Driver Version: $driver_version"
     
-    if [ -z "$driver_version" ] || [ "$driver_version" -lt 555 ]; then
+    if [ -z "$driver_version" ]; then
+        print_message "Unable to determine driver version"
+        return 1
+    fi
+    
+    if [ "$driver_version" -lt 555 ]; then
         print_message "Driver version $driver_version is below required 555 (for CUDA 12.5)"
         return 1
     fi
     
     print_message "Driver version $driver_version meets requirements (for CUDA 12.5+)"
-    return 0
-}
-
-# Function to check if all requirements are installed
-check_requirements_installed() {
-    # Check if Docker is installed
-    if ! command -v docker &> /dev/null; then
-        return 1
-    fi
-
-    # Check if NVIDIA Container Toolkit is installed
-    if ! dpkg -l | grep -q nvidia-container-toolkit; then
-        return 1
-    fi
-
-    # Check if NVIDIA driver version meets requirements
-    if ! check_cuda_version; then
-        return 1
-    fi
-
     return 0
 }
 
@@ -67,29 +52,24 @@ fi
 # Set noninteractive frontend
 export DEBIAN_FRONTEND=noninteractive
 
-# Perform installations only if requirements are not fully met
-if ! check_requirements_installed; then
-    # Update and upgrade the system
-    print_message "Updating and upgrading system packages..."
-    apt update && apt upgrade -y
-    check_status "System update and upgrade"
-
-    # Install additional packages from the second script
-    print_message "Installing additional packages..."
-    apt install -y curl openssl iptables build-essential protobuf-compiler git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev tar clang bsdmainutils ncdu unzip libleveldb-dev libclang-dev ninja-build
-    check_status "Additional packages installation"
-fi
+# Install additional packages
+print_message "Installing additional packages..."
+apt update
+apt install -y curl openssl iptables build-essential protobuf-compiler git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev tar clang bsdmainutils ncdu unzip libleveldb-dev libclang-dev ninja-build
+check_status "Additional packages installation"
 
 # Install Docker if not already installed
 if ! command -v docker &> /dev/null; then
     print_message "Docker not found. Installing Docker..."
     # Remove any conflicting packages
-    for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do apt-get remove -y $pkg || true; done
+    for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do apt remove -y $pkg || true; done
 
     # Install prerequisites
     apt install -y ca-certificates curl gnupg software-properties-common
+    check_status "Docker prerequisites installation"
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    check_status "Docker GPG key setup"
     chmod a+r /etc/apt/keyrings/docker.gpg
 
     # Add Docker repository
@@ -97,6 +77,7 @@ if ! command -v docker &> /dev/null; then
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
       $(lsb_release -cs) stable" | \
       tee /etc/apt/sources.list.d/docker.list > /dev/null
+    check_status "Docker repository setup"
 
     # Update and install Docker
     apt update
@@ -109,11 +90,15 @@ if ! command -v docker &> /dev/null; then
     check_status "Docker service setup"
 
     # Add current user to docker group if not already added
-    if ! groups $SUDO_USER | grep -q docker; then
-        print_message "Adding user to docker group..."
-        usermod -aG docker $SUDO_USER
+    if [ -z "$SUDO_USER" ]; then
+        print_message "Error: SUDO_USER is not set. Please run the script with sudo'sudo'."
+        exit 1
+    fi
+    if ! groups "$SUDO_USER" | grep -q docker; then
+        print_message "Adding user $SUDO_USER to docker group..."
+        usermod -aG docker "$SUDO_USER"
         check_status "Adding user to docker group"
-        print_message "Note: Docker group changes will take effect after next login or reboot"
+        print_message "Note: Log out and back in, or run 'newgrp docker' to apply group changes."
     fi
 
     # Verify Docker is working
@@ -124,11 +109,15 @@ else
     print_message "Docker already installed, skipping Docker installation"
     
     # Verify Docker group membership
-    if ! groups $SUDO_USER | grep -q docker; then
-        print_message "Adding user to docker group..."
-        usermod -aG docker $SUDO_USER
+    if [ -z "$SUDO_USER" ]; then
+        print_message "Error: SUDO_USER is not set. Please run the script with sudo."
+        exit 1
+    fi
+    if ! groups "$SUDO_USER" | grep -q docker; then
+        print_message "Adding user $SUDO_USER to docker group..."
+        usermod -aG docker "$SUDO_USER"
         check_status "Adding user to docker group"
-        print_message "Note: Docker group changes will take effect after next login or reboot"
+        print_message "Note: Log out and back in, or run 'newgrp docker' to apply group changes."
     fi
 
     # Verify Docker is working
@@ -143,15 +132,16 @@ if ! dpkg -l | grep -q nvidia-container-toolkit; then
     
     # Set up the NVIDIA Container Toolkit repository and GPG key
     print_message "Setting up NVIDIA Container Toolkit repository..."
-    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-        && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    check_status "NVIDIA Container Toolkit GPG key setup"
+    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
         sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
         tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-    check_status "Repository setup"
+    check_status "NVIDIA Container Toolkit repository setup"
 
     # Update package list and install
-    apt-get update
-    apt-get install -y nvidia-container-toolkit
+    apt update
+    apt install -y nvidia-container-toolkit
     check_status "NVIDIA Container Toolkit installation"
 
     # Configure Docker to use NVIDIA Container Runtime
@@ -181,6 +171,7 @@ if ! check_cuda_version; then
     # Add NVIDIA repository
     print_message "Adding NVIDIA repository..."
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb -O
+    check_status "NVIDIA repository key download"
     dpkg -i cuda-keyring_1.1-1_all.deb
     apt update
     check_status "NVIDIA repository setup"
@@ -190,7 +181,7 @@ if ! check_cuda_version; then
     apt install -y cuda-drivers
     check_status "NVIDIA driver and CUDA installation"
 
-    print_message "NVIDIA drivers installed. System needs to reboot."
+    print_message "NVIDIA drivers installed. Please reboot the system to apply changes."
     sleep 5
 fi
 
