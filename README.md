@@ -1,4 +1,4 @@
-# Succinct Prover Guide
+![image](https://github.com/user-attachments/assets/737f3cde-d375-46b9-9b5e-e50f9ec3f9da)# Succinct Prover Guide
 
 ## Hardware Requirements:
 **Minimal Setup**
@@ -21,6 +21,8 @@
 * **[Vast.ai](https://cloud.vast.ai/?ref_id=62897&creator_id=62897&name=Ubuntu%2022.04%20VM)**: SSH-Key needed
   * Rent **VM Ubuntu** [template](https://cloud.vast.ai/?ref_id=62897&creator_id=62897&name=Ubuntu%2022.04%20VM)
   * Refer to this [Guide](https://github.com/0xmoei/Rent-and-Config-GPU) to generate SSH-Key, Rent GPU and connect to your Vast GPU
+ 
+Also saw people mentioning [GenesisCloud](https://id.genesiscloud.com/signin/) & [Tensordock](https://dashboard.tensordock.com/deploy) that I am not using them due to not supporting cryptocurrencies
 
 ---
 
@@ -52,6 +54,8 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+---
+
 ## Setup Prover
 Copy .env from example
 ```bash
@@ -64,6 +68,8 @@ nano .env
 * Replace the variables with your own values.
 * `PGUS_PER_SECOND` & `PROVE_PER_BPGU`: Keep default values, or go through [Calibrate](#calibrate-prover) section to configure them.
 
+---
+
 ## Calibrate Prover
 The prover needs to be calibrated to your hardware in order to configure key parameters that govern its behavior. There are two key parameters that need to be set:
 * **Bidding Price (`PROVE_PER_BPGU`)**: This is the price per proving gas unit (PGU) that the prover will bid for. This determines the profit margin of the prover and it's competitiveness with the rest of the network.
@@ -71,6 +77,7 @@ The prover needs to be calibrated to your hardware in order to configure key par
 ```
 docker run --gpus all \
     --device-cgroup-rule='c 195:* rmw' \
+    --name spn-callibrate \
     --network host \
     -e NETWORK_PRIVATE_KEY="$PRIVATE_KEY" \
     -v /var/run/docker.sock:/var/run/docker.sock \
@@ -81,8 +88,6 @@ docker run --gpus all \
     --profit-margin 0.1 \
     --prove-price 1.00
 ```
-
-
 
 This will output calibration results that look like the following:
 ```
@@ -110,33 +115,44 @@ Calibration Results:
 │ Estimated Bid Price  │ 0.28 $PROVE per 1B PGUs │
 └──────────────────────┴─────────────────────────┘
 ```
+* This tells you that your prover can prove 1742469 prover gas units (PGUs) per second and that you should bid 0.28 $PROVE per 1B PGUs for proofs.
+* Now you can set `PGUS_PER_SECOND` & `PROVE_PER_BPGU` based on your callibration in `.env` file
+* Although, you can keep `PROVE_PER_BPGU` as low as `1.01` to prove more requests with less income
 
-
-This tells you that your prover can prove 1742469 prover gas units (PGUs) per second and that you should bid 0.28 $PROVE per 1B PGUs for proofs.
-
-
-Set Prover parameters:
+After Callibration, delete its docker container:
 ```
-export PGUS_PER_SECOND=<PGUS_PER_SECOND>
-export PROVE_PER_BPGU=<PROVE_PER_BPGU>
-export PROVER_ADDRESS=<PROVER_ADDRESS>
-export PRIVATE_KEY=<PRIVATE_KEY>
+docker rm spn-callibrate
 ```
-* Replace the values and execute the commands
+
+---
+
+## Run Prover
+```console
+# Ensure you are in succinct directory
+cd succinct
+
+# Run
+docker compose up -d
+```
+
+When looking for a request:
+
+![image](https://github.com/user-attachments/assets/9945cdd4-0b99-4dfd-ad75-ad156bc6410e)
 
 
-Run
+When proving a request:
+
+![image](https://github.com/user-attachments/assets/596d1c1a-213c-4d71-8585-58a2e5439f92)
+
+
+---
+
+## Stop Prover
+```console
+docker stop sp1-gpu succinct-spn-node-1
+docker rm sp1-gpu succinct-spn-node-1
 ```
-docker run --gpus all \
-    --device-cgroup-rule='c 195:* rmw' \
-    --network host \
-    -e NETWORK_PRIVATE_KEY=$PRIVATE_KEY \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    public.ecr.aws/succinct-labs/spn-node:latest-gpu \
-    prove \
-    --rpc-url https://rpc.sepolia.succinct.xyz \
-    --throughput $PGUS_PER_SECOND \
-    --bid $PROVE_PER_BPGU \
-    --private-key $PRIVATE_KEY \
-    --prover $PROVER_ADDRESS
-```
+
+---
+
+I will update the guide with more optimization soon.
