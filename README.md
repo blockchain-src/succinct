@@ -28,7 +28,7 @@ Also saw people mentioning [GenesisCloud](https://id.genesiscloud.com/signin/) &
 
 ## Prover Setup
 * 1- Create a Prover in [Succinct Staking Dashboard](https://staking.sepolia.succinct.xyz/prover) on Sepolia network
-* 2- Save your prover 0xaddress under *My Prover*
+* 2- Save your prover 0xaddress under *My Prover* (Keep a very low amount in your wallet)
 * 3- Stake $PROVE token on your Prover [here](https://staking.sepolia.succinct.xyz/)
 * 4- You can add a new signer wallet (fresh wallet) in [prover interface](https://staking.sepolia.succinct.xyz/prover) to your prover since you have to input the privatekey into the CLI
 
