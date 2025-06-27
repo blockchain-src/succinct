@@ -172,11 +172,6 @@ if ! check_cuda_version; then
     apt update
     check_status "System update"
 
-    # Install essential packages
-    print_message "Installing build essential and headers..."
-    apt install -y build-essential linux-headers-$(uname -r)
-    check_status "Essential packages installation"
-
     # Remove existing NVIDIA installations
     print_message "Removing existing NVIDIA installations..."
     apt remove -y nvidia-* --purge || true
