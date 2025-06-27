@@ -81,7 +81,6 @@ docker run --gpus all \
     --profit-margin 0.1 \
     --prove-price 1.00
 ```
-* Stop GPU container after callibration: 
 
 
 
