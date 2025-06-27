@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/737f3cde-d375-46b9-9b5e-e50f9ec3f9da)# Succinct Prover Guide
+# Succinct Prover Guide
 
 ## Hardware Requirements:
 **Minimal Setup**
