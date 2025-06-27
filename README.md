@@ -54,7 +54,7 @@ cd succinct
 ### Install Dependecies
 ```
 chmod +x setup.sh
-./setup.sh
+sudo ./setup.sh
 ```
 
 ---
