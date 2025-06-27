@@ -157,14 +157,14 @@ When proving a request:
 
 
 ### Common Errors
-> docker: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+> 1- docker: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
 
 * Make sure your server runs Ubuntu VM.
 
 
-> ERROR:  Permanent error encountered when Bid: request is not in the requested state (Client specified an invalid argument)
+> 2- ERROR:  Permanent error encountered when Bid: request is not in the requested state (Client specified an invalid argument)
 >
-> ERROR  Permanent error encountered when Bid: Timeout expired (The operation was cancelled)
+> 3- ERROR  Permanent error encountered when Bid: Timeout expired (The operation was cancelled)
 
 * Normal errors due to network or your prover's behaviour.
 
