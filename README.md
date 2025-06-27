@@ -35,81 +35,42 @@
 ## Dependecies
 ### Update Packages
 ```
-sudo apt update && sudo apt upgrade -y
+sudo apt update && sudo apt upgrade
+sudo apt install git -y
 ```
 
-### Install Packages
+### Clone Repo
 ```
-apt install curl  openssl iptables build-essential protobuf-compiler git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev tar clang bsdmainutils ncdu unzip libleveldb-dev libclang-dev ninja-build linux-headers-$(uname -r) -y
+git clone https://github.com/0xmoei/succinct
+
+cd succinct
 ```
 
-### Install Docker
+### Install Dependecies
+```
+chmod +x setup.sh
+./setup.sh
+```
+
+## Setup Prover
+Copy .env from example
 ```bash
-sudo apt update -y && sudo apt upgrade -y
-for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
-
-sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-echo \
-  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt update -y && sudo apt upgrade -y
-
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# Test Docker
-sudo docker run hello-world
-
-sudo systemctl enable docker
-sudo systemctl restart docker
+cp .env.example .env
 ```
-
-### Install Nvidia Driver & CUDA
-Verify if installed: `nvidia-smi`
-
-* If not installed:
+Edit `.env`:
 ```
-sudo apt update
-ubuntu-drivers list --gpgpu
-sudo ubuntu-drivers install --gpgpu nvidia-driver-575
-sudo apt install -y nvidia-utils-575
-
-# Verify
-nvidia-smi
+nano .env
 ```
+* Replace the variables with your own values.
+* `PGUS_PER_SECOND` & `PROVE_PER_BPGU`: Keep default values, or go through [Calibrate](#calibrate-prover) section to configure them.
 
-### Install Nvidia Container Toolkit
-Verify if installed: `dpkg -l | grep nvidia-container-toolkit`
-
-* If not installed:
-```console
-# Set up the NVIDIA Container Toolkit repository and GPG key
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-    && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-
-# Update the package list and install the toolkit
-sudo apt-get update
-sudo apt-get install -y nvidia-container-toolkit
-
-dpkg -l | grep nvidia-container-toolkit
+## Calibrate Prover
+The prover needs to be calibrated to your hardware in order to configure key parameters that govern its behavior. There are two key parameters that need to be set:
+* **Bidding Price (`PROVE_PER_BPGU`)**: This is the price per proving gas unit (PGU) that the prover will bid for. This determines the profit margin of the prover and it's competitiveness with the rest of the network.
+* **Expected Throughput(`PGUS_PER_SECOND`)**: This is an estimate of the prover's proving throughput in PGUs per second. This is used to estimate whether a prover can complete a proof before its deadline.
 ```
-
-
-
-
-
-
-```
-docker run \
-    --gpus all \
+docker run --gpus all \
+    --device-cgroup-rule='c 195:* rmw' \
     --network host \
     -e NETWORK_PRIVATE_KEY="$PRIVATE_KEY" \
     -v /var/run/docker.sock:/var/run/docker.sock \
@@ -120,6 +81,8 @@ docker run \
     --profit-margin 0.1 \
     --prove-price 1.00
 ```
+* Stop GPU container after callibration: 
+
 
 
 This will output calibration results that look like the following:
