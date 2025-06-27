@@ -1,97 +1,110 @@
 # Succinct Prover Guide
 
-
 ## Hardware Requirements:
 **Minimal Setup**
 * CPU: 8 cores or more
 * Memory: 16GB+
-* Optional: NVIDIA GPU (e.g., RTX 4090, L4, A10G)
+* NVIDIA GPU (e.g., RTX 4090, L4, A10G)
 
+---
 
-**Competitive Setup (Optimized)**
-* Nodes: 64+ prover instances
-* Hardware: Multiple high-end NVIDIA GPUs (e.g., RTX 4090, L40s)
-* CPU: 16+ cores per GPU
-* Memory: 16GB+ per GPU
+### Software
+* Supported: Ubuntu 20.04/22.04/24.04
+* NVIDIA Driver: 555+
+* If you are running on Windows os locally, install Ubuntu 22 WSL using this [Guide](https://github.com/0xmoei/Install-Linux-on-Windows)
 
-> Currently People are already proving with single 3090 GPUs.
+---
 
+## Rent GPU
 
+**Recommended GPU Providers**
+* **[Vast.ai](https://cloud.vast.ai/?ref_id=62897&creator_id=62897&name=Ubuntu%2022.04%20VM)**: SSH-Key needed
+  * Rent **VM Ubuntu** [template](https://cloud.vast.ai/?ref_id=62897&creator_id=62897&name=Ubuntu%2022.04%20VM)
+  * Refer to this [Guide](https://github.com/0xmoei/Rent-and-Config-GPU) to generate SSH-Key, Rent GPU and connect to your Vast GPU
 
-Onchain Requirements
-* A fresh Ethereum wallet with Sepolia ETH
-* At least 1000 $PROVE tokens
+---
 
+## Prover Setup
+* 1- Create a Prover in [Succinct Staking Dashboard](https://staking.sepolia.succinct.xyz/prover) on Sepolia network
+* 2- Save your prover 0xaddress under *My Prover*
+* 3- Stake $PROVE token on your Prover [here](https://staking.sepolia.succinct.xyz/)
+* 4- You can add a new signer wallet (fresh wallet) in [prover interface](https://staking.sepolia.succinct.xyz/prover) to your prover since you have to input the privatekey into the CLI
 
-## Install Dependecies
+---
+
+## Dependecies
 ### Update Packages
 ```
-apt update && apt upgrade -y
+sudo apt update && sudo apt upgrade -y
 ```
 
 ### Install Packages
 ```
-apt install curl  openssl iptables build-essential protobuf-compiler git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev tar clang bsdmainutils ncdu unzip libleveldb-dev libclang-dev ninja-build -y
+apt install curl  openssl iptables build-essential protobuf-compiler git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev tar clang bsdmainutils ncdu unzip libleveldb-dev libclang-dev ninja-build linux-headers-$(uname -r) -y
 ```
 
-### Install Rust
+### Install Docker
+```bash
+sudo apt update -y && sudo apt upgrade -y
+for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
+
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update -y && sudo apt upgrade -y
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Test Docker
+sudo docker run hello-world
+
+sudo systemctl enable docker
+sudo systemctl restart docker
+```
+
+### Install Nvidia Driver & CUDA
+Verify if installed: `nvidia-smi`
+
+* If not installed:
+```
+sudo apt update
+ubuntu-drivers list --gpgpu
+sudo ubuntu-drivers install --gpgpu nvidia-driver-575
+sudo apt install -y nvidia-utils-575
+
+# Verify
+nvidia-smi
+```
+
+### Install Nvidia Container Toolkit
+Verify if installed: `dpkg -l | grep nvidia-container-toolkit`
+
+* If not installed:
 ```console
-# Install rustup:
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-. "$HOME/.cargo/env"
-source $HOME/.cargo/env
+# Set up the NVIDIA Container Toolkit repository and GPG key
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+    && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
-# Update rustup:
-rustup update
+# Update the package list and install the toolkit
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
 
-# Install the Rust Toolchain:
-apt update
-apt install cargo
-
-# Unset Rust Toolchain variable
-unset RUSTUP_TOOLCHAIN
-```
-
-### Instal Succinct Rust Toolchain
-```console
-curl -L https://sp1up.succinct.xyz | bash
-
-source /root/.bashrc
-
-sp1up
-
-# Verify installation:
-RUSTUP_TOOLCHAIN=succinct cargo --version
+dpkg -l | grep nvidia-container-toolkit
 ```
 
 
-```
-git clone https://github.com/succinctlabs/network.git
-cd network
-```
 
-Build:
-```
-cd bin/node
-RUSTFLAGS="-C target-cpu=native" cargo build --release
-```
 
-We provide a Dockerfile for building the prover on CPU and GPU.
-
-To build the image from source, navigate to the root of the repository and run the following for CPU:
-
-go to repo main directory (`/network`)
-```
-cd ../..
-```
-
-```
-docker build --target cpu -t spn-node:latest-cpu .
-```
-and the following for GPU:
-```
-docker build --target gpu -t spn-node:latest-gpu .
-```
 
 
 ```
