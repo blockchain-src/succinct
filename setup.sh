@@ -76,7 +76,7 @@ if ! check_requirements_installed; then
 
     # Install additional packages from the second script
     print_message "Installing additional packages..."
-    apt install -y curl openssl iptables build-essential protobuf-compiler git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev tar clang bsdmainutils ncdu unzip libleveldb-dev libclang-dev ninja-build linux-headers-$(uname -r)
+    apt install -y curl openssl iptables build-essential protobuf-compiler git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev tar clang bsdmainutils ncdu unzip libleveldb-dev libclang-dev ninja-build
     check_status "Additional packages installation"
 fi
 
