@@ -156,6 +156,19 @@ When proving a request:
 ![image](https://github.com/user-attachments/assets/596d1c1a-213c-4d71-8585-58a2e5439f92)
 
 
+### Common Errors
+> docker: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+
+* Make sure your server runs Ubuntu VM.
+
+
+> ERROR:  Permanent error encountered when Bid: request is not in the requested state (Client specified an invalid argument)
+>
+> ERROR  Permanent error encountered when Bid: Timeout expired (The operation was cancelled)
+
+* Normal errors due to network or your prover's behaviour.
+
+
 ---
 
 ## Stop Prover
