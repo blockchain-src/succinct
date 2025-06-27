@@ -135,6 +135,17 @@ cd succinct
 docker compose up -d
 ```
 
+---
+
+## Prover Logs
+```console
+# Logs
+docker compose logs -f
+
+# Last 100 logs
+docker compose logs -fn 100
+```
+
 When looking for a request:
 
 ![image](https://github.com/user-attachments/assets/9945cdd4-0b99-4dfd-ad75-ad156bc6410e)
