@@ -40,7 +40,7 @@ Also saw people mentioning [GenesisCloud](https://id.genesiscloud.com/signin/) &
 ## Dependecies
 ### Update Packages
 ```
-sudo apt update && sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
 sudo apt install git -y
 ```
 
