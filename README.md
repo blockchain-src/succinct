@@ -182,4 +182,32 @@ docker rm sp1-gpu succinct-spn-node-1
 
 ---
 
+## Stake on a Prover via CLI
+**1- Install Rust & foundry**
+```console
+# Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
+
+# Foundry
+curl -L https://foundry.paradigm.xyz | bash
+source /$HOME/.bashrc
+foundryup
+
+# Check Foundry Version
+cast --version
+```
+
+**2- Stake Command**
+```bash
+cast send --rpc-url https://rpc.sepolia.org --private-key YOUR_PRIVATE_KEY 0x837D40650aB3b0AA02E7e28238D9FEA73031856C "stake(address,uint256)" 0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348 100000000000000000000
+```
+* Replace followings in the above command:
+  * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
+  * `100000000000000000000`: Means `100` $PROVE tokens, you can modify it.
+  * `0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348` is my prover address, you can replace it with any other prover address you want
+
+
+---
+
 I will update the guide with more optimization soon.
