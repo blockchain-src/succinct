@@ -219,9 +219,7 @@ cast send --rpc-url https://sepolia.drpc.org --gas-limit 200000000 --private-key
 
 **Balance of $PROVE**
 ```
-balance of staked tokens:
 cast call --rpc-url https://sepolia.drpc.org 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "balanceOf(address)(uint256)" WALLET_ADDRESS
-
 ```
 * Replace `WALLET_ADDRESS` with your wallet address
 
