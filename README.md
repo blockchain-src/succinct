@@ -199,7 +199,8 @@ cast --version
 ```
 
 **2- Stake Commands:**
-* Approve:
+
+**Approve:**
 ```bash
 cast send --rpc-url https://sepolia.drpc.org --private-key YOUR_PRIVATE_KEY 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "approve(address,uint256)" 0x837D40650aB3b0AA02E7e28238D9FEA73031856C 10000000000000000000
 ```
@@ -207,7 +208,7 @@ cast send --rpc-url https://sepolia.drpc.org --private-key YOUR_PRIVATE_KEY 0x37
   * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
   * `100000000000000000000`: Means `10` $PROVE tokens, you can modify it
 
-* Stake:
+**Stake:**
 ```bash
 cast send --rpc-url https://sepolia.drpc.org --gas-limit 200000000 --private-key YOUR_PRIVATE_KEY 0x837D40650aB3b0AA02E7e28238D9FEA73031856C "stake(address,uint256)" 0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348 10000000000000000000
 ```
@@ -215,6 +216,21 @@ cast send --rpc-url https://sepolia.drpc.org --gas-limit 200000000 --private-key
   * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
   * `100000000000000000000`: Means `10` $PROVE tokens, you can modify it
   * `0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348` is my prover address, you can replace it with any other prover address you want
+
+**Balance of $PROVE**
+```
+balance of staked tokens:
+cast call --rpc-url https://sepolia.drpc.org 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "balanceOf(address)(uint256)" WALLET_ADDRESS
+
+```
+* Replace `WALLET_ADDRESS` with your wallet address
+
+
+**Balance of Staked $PROVE**
+```bash
+cast call --rpc-url https://sepolia.drpc.org 0x837D40650aB3b0AA02E7e28238D9FEA73031856C "balanceOf(address)(uint256)" WALLET_ADDRESS
+```
+* Replace `WALLET_ADDRESS` with your wallet address
 
 
 ---
