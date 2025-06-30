@@ -201,7 +201,7 @@ cast --version
 **2- Stake Commands:**
 * Approve:
 ```bash
-cast send --rpc-url https://sepolia.drpc.org --private-key <YOUR_PRIVATE_KEY> 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "approve(address,uint256)" 0x837D40650aB3b0AA02E7e28238D9FEA73031856C 10000000000000000000
+cast send --rpc-url https://sepolia.drpc.org --private-key YOUR_PRIVATE_KEY 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "approve(address,uint256)" 0x837D40650aB3b0AA02E7e28238D9FEA73031856C 10000000000000000000
 ```
 * Replace followings in the above command:
   * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
