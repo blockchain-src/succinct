@@ -183,7 +183,7 @@ docker rm sp1-gpu succinct-spn-node-1
 ---
 
 ## Stake on a Prover via CLI
-**1- Install Rust & foundry**
+**1- Install Rust & foundry:**
 ```console
 # Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -198,13 +198,22 @@ foundryup
 cast --version
 ```
 
-**2- Stake Command**
+**2- Stake Commands:**
+* Approve:
 ```bash
-cast send --rpc-url https://rpc.sepolia.org --private-key YOUR_PRIVATE_KEY 0x837D40650aB3b0AA02E7e28238D9FEA73031856C "stake(address,uint256)" 0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348 100000000000000000000
+cast send --rpc-url https://sepolia.drpc.org --private-key <YOUR_PRIVATE_KEY> 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "approve(address,uint256)" 0x837D40650aB3b0AA02E7e28238D9FEA73031856C 10000000000000000000
 ```
 * Replace followings in the above command:
   * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
-  * `100000000000000000000`: Means `100` $PROVE tokens, you can modify it.
+  * `100000000000000000000`: Means `10` $PROVE tokens, you can modify it
+
+* Stake:
+```bash
+cast send --rpc-url https://sepolia.drpc.org --gas-limit 200000000 --private-key YOUR_PRIVATE_KEY 0x837D40650aB3b0AA02E7e28238D9FEA73031856C "stake(address,uint256)" 0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348 10000000000000000000
+```
+* Replace followings in the above command:
+  * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
+  * `100000000000000000000`: Means `10` $PROVE tokens, you can modify it
   * `0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348` is my prover address, you can replace it with any other prover address you want
 
 
