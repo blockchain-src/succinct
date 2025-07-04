@@ -71,6 +71,11 @@ nano .env
 * Replace the variables with your own values.
 * `PGUS_PER_SECOND` & `PROVE_PER_BPGU`: Keep default values, or go through [Calibrate](#calibrate-prover) section to configure them.
 
+Unset any conflicting shell variables:
+```
+unset PGUS_PER_SECOND PROVE_PER_BPGU PROVER_ADDRESS PRIVATE_KEY
+```
+
 ---
 
 ## Calibrate Prover
