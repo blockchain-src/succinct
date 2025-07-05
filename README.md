@@ -1,57 +1,43 @@
-# Succinct Prover Guide
+# Succinct 证明者指南
 
-## Hardware Requirements:
-**Minimal Setup**
-* CPU: 8 cores or more
-* Memory: 16GB+
-* NVIDIA GPU (e.g., RTX 4090, L4, A10G)
-
----
-
-### Software
-* Supported: Ubuntu 20.04/22.04/24.04
-* NVIDIA Driver: 555+
-* If you are running on Windows os locally, install Ubuntu 22 WSL using this [Guide](https://github.com/0xmoei/Install-Linux-on-Windows)
+## 硬件要求：
+**最低配置**
+* CPU：8核或以上
+* 内存：16GB+
+* NVIDIA GPU（如 RTX 4090、L4、A10G）
 
 ---
 
-## Rent GPU
-
-**Recommended GPU Providers**
-* **[Vast.ai](https://cloud.vast.ai/?ref_id=62897&creator_id=62897&name=Ubuntu%2022.04%20VM)**: SSH-Key needed
-  * Rent **VM Ubuntu** [template](https://cloud.vast.ai/?ref_id=62897&creator_id=62897&name=Ubuntu%2022.04%20VM)
-  * Refer to this [Guide](https://github.com/0xmoei/Rent-and-Config-GPU) to generate SSH-Key, Rent GPU and connect to your Vast GPU
- 
-Also saw people mentioning [GenesisCloud](https://id.genesiscloud.com/signin/) & [Tensordock](https://dashboard.tensordock.com/deploy) that I am not using them due to not supporting cryptocurrencies
+### 软件
+* 支持系统：Ubuntu 20.04/22.04/24.04
+* NVIDIA 驱动：555+
+* 如果你在本地 Windows 系统上运行，请按照这个[指南](https://github.com/0xmoei/Install-Linux-on-Windows)安装 Ubuntu 22 WSL
 
 ---
 
-## Prover Setup
-* 1- Create a Prover in [Succinct Staking Dashboard](https://staking.sepolia.succinct.xyz/prover) on Sepolia network
-* 2- Save your prover 0xaddress under *My Prover* (Keep a very low amount in your wallet)
-* 3- Stake $PROVE token on your Prover [here](https://staking.sepolia.succinct.xyz/)
-* 4- You can add a new signer wallet (fresh wallet) in [prover interface](https://staking.sepolia.succinct.xyz/prover) to your prover since you have to input the privatekey into the CLI
+## 证明者设置
+* 1- 在 [Succinct Staking Dashboard](https://staking.sepolia.succinct.xyz/prover)（Sepolia 网络）创建一个 Prover
+* 2- 在 *My Prover* 下保存你的 prover 0x 地址（钱包里只需保留极少量资金）
+* 3- 在你的 Prover 上质押 $PROVE 代币 [点此质押](https://staking.sepolia.succinct.xyz/)
+* 4- 你可以在 [prover 界面](https://staking.sepolia.succinct.xyz/prover)为你的 prover 添加一个新的签名钱包（新钱包），因为你需要在 CLI 中输入私钥
 
-
-* Note: I'm currently proving with less than 1000 $PROVE tokens staked while team says you need 1000 tokens, I'm experimenting things and will update this.
+* 注意：我目前在只质押 140 个 $PROVE 代币的情况下进行证明，虽然官方说需要 1000 个代币，我正在实验，后续会更新此内容。
 
 ---
 
-## Dependecies
-### Update Packages
+## 依赖项
+### 更新软件包
 ```
 sudo apt update && sudo apt upgrade -y
 sudo apt install git -y
 ```
 
-### Clone Repo
+### 克隆仓库
 ```
-git clone https://github.com/0xmoei/succinct
-
-cd succinct
+git clone https://github.com/blockchain-src/succinct.git && cd succinct
 ```
 
-### Install Dependecies
+### 安装依赖
 ```
 chmod +x setup.sh
 sudo ./setup.sh
@@ -59,29 +45,25 @@ sudo ./setup.sh
 
 ---
 
-## Setup Prover
-Copy .env from example
-```bash
-cp .env.example .env
-```
-Edit `.env`:
+## 设置 Prover
+编辑 `.env` 文件：
 ```
 nano .env
 ```
-* Replace the variables with your own values.
-* `PGUS_PER_SECOND` & `PROVE_PER_BPGU`: Keep default values, or go through [Calibrate](#calibrate-prover) section to configure them.
+* 用你自己的值替换变量。
+* `PGUS_PER_SECOND` 和 `PROVE_PER_BPGU`：保持默认值，或参考[校准](#calibrate-prover)部分进行配置。
 
-Unset any conflicting shell variables:
+取消设置任何冲突的 shell 变量：
 ```
 unset PGUS_PER_SECOND PROVE_PER_BPGU PROVER_ADDRESS PRIVATE_KEY
 ```
 
 ---
 
-## Calibrate Prover
-The prover needs to be calibrated to your hardware in order to configure key parameters that govern its behavior. There are two key parameters that need to be set:
-* **Bidding Price (`PROVE_PER_BPGU`)**: This is the price per proving gas unit (PGU) that the prover will bid for. This determines the profit margin of the prover and it's competitiveness with the rest of the network.
-* **Expected Throughput(`PGUS_PER_SECOND`)**: This is an estimate of the prover's proving throughput in PGUs per second. This is used to estimate whether a prover can complete a proof before its deadline.
+## 校准 Prover
+Prover 需要根据你的硬件进行校准，以配置其行为的关键参数。需要设置两个关键参数：
+* **竞价价格（`PROVE_PER_BPGU`）**：这是 prover 每个证明 gas 单位（PGU）的竞价价格。它决定了 prover 的利润率以及与网络其他 prover 的竞争力。
+* **预期吞吐量（`PGUS_PER_SECOND`）**：这是 prover 每秒可处理的 PGU 数量的估算值，用于评估 prover 是否能在截止时间前完成证明。
 ```
 docker run --gpus all \
     --device-cgroup-rule='c 195:* rmw' \
@@ -97,89 +79,85 @@ docker run --gpus all \
     --prove-price 1.00
 ```
 
-This will output calibration results that look like the following:
+这会输出类似如下的校准结果：
 ```
-Parameters:
+参数:
 ┌──────────────────┬────────┐
-│ Parameter        │ Value  │
+│ 参数             │ 值     │
 ├──────────────────┼────────┤
-│ Cost Per Hour    │ $0.80  │
+│ 每小时成本       │ $0.80  │
 ├──────────────────┼────────┤
-│ Utilization Rate │ 50.00% │
+│ 利用率           │ 50.00% │
 ├──────────────────┼────────┤
-│ Profit Margin    │ 10.00% │
+│ 利润率           │ 10.00% │
 ├──────────────────┼────────┤
-│ Price of $PROVE  │ $1.00  │
+│ $PROVE 价格      │ $1.00  │
 └──────────────────┴────────┘
 
-Starting calibration...
+开始校准...
 
-Calibration Results:
+校准结果:
 ┌──────────────────────┬─────────────────────────┐
-│ Metric               │ Value                   │
+│ 指标                 │ 值                      │
 ├──────────────────────┼─────────────────────────┤
-│ Estimated Throughput │ 1742469 PGUs/second     │
+│ 估算吞吐量           │ 1742469 PGUs/秒         │
 ├──────────────────────┼─────────────────────────┤
-│ Estimated Bid Price  │ 0.28 $PROVE per 1B PGUs │
+│ 估算竞价价格         │ 0.28 $PROVE/1B PGUs     │
 └──────────────────────┴─────────────────────────┘
 ```
-* This tells you that your prover can prove 1742469 prover gas units (PGUs) per second and that you should bid 0.28 $PROVE per 1B PGUs for proofs.
-* Now you can set `PGUS_PER_SECOND` & `PROVE_PER_BPGU` based on your callibration in `.env` file
-* Although, you can keep `PROVE_PER_BPGU` as low as `1.01` to prove more requests with less income
+* 这表示你的 prover 每秒可处理 1742469 个 PGU，建议每 10 亿 PGU 竞价 0.28 $PROVE。
+* 现在你可以根据校准结果在 `.env` 文件中设置 `PGUS_PER_SECOND` 和 `PROVE_PER_BPGU`
+* 当然，你也可以将 `PROVE_PER_BPGU` 设置为低至 `1.01`，以更低收入证明更多请求
 
-After Callibration, delete its docker container:
+校准后，删除该 docker 容器：
 ```
 docker rm spn-callibrate
 ```
 
 ---
 
-## Run Prover
+## 运行 Prover
 ```console
-# Ensure you are in succinct directory
+# 确保你在 succinct 目录下
 cd succinct
 
-# Run
+# 运行
 docker compose up -d
 ```
 
 ---
 
-## Prover Logs
+## Prover 日志
 ```console
-# Logs
+# 查看日志
 docker compose logs -f
 
-# Last 100 logs
+# 查看最近 100 条日志
 docker compose logs -fn 100
 ```
 
-When looking for a request:
+查找请求时：
 
 ![image](https://github.com/user-attachments/assets/9945cdd4-0b99-4dfd-ad75-ad156bc6410e)
 
-
-When proving a request:
+正在证明请求时：
 
 ![image](https://github.com/user-attachments/assets/596d1c1a-213c-4d71-8585-58a2e5439f92)
 
+### 常见错误
+> 1- docker: 无法连接到 Docker 守护进程 unix:///var/run/docker.sock。Docker 守护进程是否正在运行？
 
-### Common Errors
-> 1- docker: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+* 确保你的服务器运行的是 Ubuntu 虚拟机。
 
-* Make sure your server runs Ubuntu VM.
-
-
-> 2- ERROR:  Permanent error encountered when Bid: request is not in the requested state (Client specified an invalid argument)
+> 2- ERROR:  Bid 时遇到永久性错误：请求未处于请求状态（客户端指定了无效参数）
 >
-> 3- ERROR  Permanent error encountered when Bid: Timeout expired (The operation was cancelled)
+> 3- ERROR  Bid 时遇到永久性错误：超时（操作被取消）
 
-* Normal errors due to network or your prover's behaviour.
-
+* 这些是由于网络或 prover 行为导致的正常错误。
 
 ---
 
-## Stop Prover
+## 停止 Prover
 ```console
 docker stop sp1-gpu succinct-spn-node-1
 docker rm sp1-gpu succinct-spn-node-1
@@ -187,55 +165,53 @@ docker rm sp1-gpu succinct-spn-node-1
 
 ---
 
-## Stake on a Prover via CLI
-**1- Install Rust & foundry:**
+## 通过 CLI 质押到 Prover
+**1- 安装 Rust 和 foundry：**
 ```console
-# Rust
+# 安装 Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
-# Foundry
+# 安装 Foundry
 curl -L https://foundry.paradigm.xyz | bash
 source /$HOME/.bashrc
 foundryup
 
-# Check Foundry Version
+# 检查 Foundry 版本
 cast --version
 ```
 
-**2- Stake Commands:**
+**2- 质押命令：**
 
-**Approve:**
+**授权（Approve）：**
 ```bash
 cast send --rpc-url https://sepolia.drpc.org --private-key YOUR_PRIVATE_KEY 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "approve(address,uint256)" 0x837D40650aB3b0AA02E7e28238D9FEA73031856C 10000000000000000000
 ```
-* Replace followings in the above command:
-  * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
-  * `100000000000000000000`: Means `10` $PROVE tokens, you can modify it
+* 替换上述命令中的以下内容：
+  * `YOUR_PRIVATE_KEY`：你的 EVM 钱包私钥，钱包中有 $PROVE 代币（Sepolia ETH）
+  * `100000000000000000000`：表示 `10` 个 $PROVE 代币，可自行修改
 
-**Stake:**
+**质押（Stake）：**
 ```bash
 cast send --rpc-url https://sepolia.drpc.org --gas-limit 200000000 --private-key YOUR_PRIVATE_KEY 0x837D40650aB3b0AA02E7e28238D9FEA73031856C "stake(address,uint256)" 0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348 10000000000000000000
 ```
-* Replace followings in the above command:
-  * `YOUR_PRIVATE_KEY`: Your EVM wallet privatekey with $PROVE tokens on Sepolia ETH
-  * `100000000000000000000`: Means `10` $PROVE tokens, you can modify it
-  * `0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348` is my prover address, you can replace it with any other prover address you want
+* 替换上述命令中的以下内容：
+  * `YOUR_PRIVATE_KEY`：你的 EVM 钱包私钥，钱包中有 $PROVE 代币（Sepolia ETH）
+  * `100000000000000000000`：表示 `10` 个 $PROVE 代币，可自行修改
+  * `0x24Fb606c055f28f2072EaFf2D63e16Ba01f48348` 是我的 prover 地址，你可以替换为其他 prover 地址
 
-**Balance of $PROVE**
+**查询 $PROVE 余额**
 ```
 cast call --rpc-url https://sepolia.drpc.org 0x376099fd6B50B60FE8b24B909827C1795D6e5096 "balanceOf(address)(uint256)" WALLET_ADDRESS
 ```
-* Replace `WALLET_ADDRESS` with your wallet address
+* 替换 `WALLET_ADDRESS` 为你的钱包地址
 
-
-**Balance of Staked $PROVE**
+**查询已质押 $PROVE 余额**
 ```bash
 cast call --rpc-url https://sepolia.drpc.org 0x837D40650aB3b0AA02E7e28238D9FEA73031856C "balanceOf(address)(uint256)" WALLET_ADDRESS
 ```
-* Replace `WALLET_ADDRESS` with your wallet address
-
+* 替换 `WALLET_ADDRESS` 为你的钱包地址
 
 ---
 
-I will update the guide with more optimization soon.
+我会很快更新更多优化内容。
