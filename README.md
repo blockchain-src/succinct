@@ -26,12 +26,6 @@
 ---
 
 ## 依赖项
-### 更新软件包
-```
-sudo apt update && sudo apt upgrade -y
-sudo apt install git -y
-```
-
 ### 克隆仓库
 ```
 git clone https://github.com/blockchain-src/succinct.git && cd succinct
