@@ -106,10 +106,7 @@ docker rm spn-callibrate
 
 ## 运行 Prover
 ```console
-# 确保你在 succinct 目录下
-cd succinct
-
-# 运行
+# 确保你在 succinct 目录下运行
 docker compose up -d
 ```
 
