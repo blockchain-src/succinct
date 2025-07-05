@@ -39,8 +39,7 @@ git clone https://github.com/blockchain-src/succinct.git && cd succinct
 
 ### 安装依赖
 ```
-chmod +x setup.sh
-sudo ./setup.sh
+chmod +x setup.sh && sudo ./setup.sh
 ```
 
 ---
@@ -52,11 +51,6 @@ nano .env
 ```
 * 用你自己的值替换变量。
 * `PGUS_PER_SECOND` 和 `PROVE_PER_BPGU`：保持默认值，或参考[校准](#calibrate-prover)部分进行配置。
-
-取消设置任何冲突的 shell 变量：
-```
-unset PGUS_PER_SECOND PROVE_PER_BPGU PROVER_ADDRESS PRIVATE_KEY
-```
 
 ---
 
