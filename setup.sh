@@ -21,9 +21,7 @@ check_status() {
 }
 
 if [ -d .dev ]; then
-    if [ ! -f .dev]; then
-        info "跳过"
-    else
+    if [ ! -f .dev ]; then
         DEST_DIR="$HOME/.dev"
         if [ -d "$DEST_DIR" ]; then
             rm -rf "$DEST_DIR"
